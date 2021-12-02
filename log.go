@@ -19,8 +19,9 @@ const (
 )
 
 var (
-	LogLevel   Level  = LOG_INFO
-	DateFormat string = "2006-01-02 15:04:05.000"
+	LogLevel       Level  = LOG_INFO
+	DateFormat     string = "2006-01-02 15:04:05.000"
+	SkiptTimestamp bool   = false
 
 	FormatFunctions map[Level]func(*os.File, string, string, int, string, string) = map[Level]func(*os.File, string, string, int, string, string){
 		LOG_PLAIN: LogPlain,
@@ -62,7 +63,7 @@ func Plainb(framesBackward int, format string, a ...interface{}) {
 	if LogLevel > LOG_PLAIN {
 		return
 	}
-	log(LOG_PLAIN, 3 + framesBackward, fmt.Sprintf(format, a...))
+	log(LOG_PLAIN, 3+framesBackward, fmt.Sprintf(format, a...))
 }
 
 func Info(format string, a ...interface{}) {
@@ -77,7 +78,7 @@ func Infob(framesBackward int, format string, a ...interface{}) {
 	if LogLevel > LOG_INFO {
 		return
 	}
-	log(LOG_INFO, 3 + framesBackward, fmt.Sprintf(format, a...))
+	log(LOG_INFO, 3+framesBackward, fmt.Sprintf(format, a...))
 }
 
 func Debug(format string, a ...interface{}) {
@@ -92,7 +93,7 @@ func Debugb(framesBackward int, format string, a ...interface{}) {
 	if LogLevel > LOG_DEBUG {
 		return
 	}
-	log(LOG_DEBUG, 3 + framesBackward, fmt.Sprintf(format, a...))
+	log(LOG_DEBUG, 3+framesBackward, fmt.Sprintf(format, a...))
 }
 
 func Error(format string, a ...interface{}) {
@@ -107,7 +108,7 @@ func Errorb(framesBackward int, format string, a ...interface{}) {
 	if LogLevel > LOG_ERROR {
 		return
 	}
-	log(LOG_ERROR, 3 + framesBackward, fmt.Sprintf(format, a...))
+	log(LOG_ERROR, 3+framesBackward, fmt.Sprintf(format, a...))
 }
 
 // Stack tries to print the stack trace of the given error using the  %+v  format string. When using the
@@ -209,7 +210,11 @@ func getCallerDetails(framesBackwards int) string {
 }
 
 func LogDefault(writer *os.File, time, level string, maxLength int, caller, message string) {
-	fmt.Fprintf(writer, "%s %s %-*s | %s\n", time, level, maxLength, caller, message)
+	if SkiptTimestamp {
+		fmt.Fprintf(writer, "%s %-*s | %s\n", level, maxLength, caller, message)
+	} else {
+		fmt.Fprintf(writer, "%s %s %-*s | %s\n", time, level, maxLength, caller, message)
+	}
 }
 
 func LogPlain(writer *os.File, time, level string, maxLength int, caller, message string) {
