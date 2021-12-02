@@ -78,7 +78,7 @@ func Info(format string, a ...interface{}) {
 		return
 	}
 	if EnableColors {
-		color.Info.Prompt(s)
+		color.Set(color.FgGreen, color.OpBold)
 	}
 	log(LOG_INFO, 3, fmt.Sprintf(format, a...))
 }
@@ -89,7 +89,7 @@ func Infob(framesBackward int, format string, a ...interface{}) {
 		return
 	}
 	if EnableColors {
-		color.Info.Prompt(s)
+		color.Set(color.FgGreen, color.OpBold)
 	}
 	log(LOG_INFO, 3+framesBackward, fmt.Sprintf(format, a...))
 }
