@@ -19,9 +19,9 @@ const (
 )
 
 var (
-	LogLevel       Level  = LOG_INFO
-	DateFormat     string = "2006-01-02 15:04:05.000"
-	SkiptTimestamp bool   = false
+	LogLevel      Level  = LOG_INFO
+	DateFormat    string = "2006-01-02 15:04:05.000"
+	SkipTimestamp bool   = false
 
 	FormatFunctions map[Level]func(*os.File, string, string, int, string, string) = map[Level]func(*os.File, string, string, int, string, string){
 		LOG_PLAIN: LogPlain,
@@ -210,7 +210,7 @@ func getCallerDetails(framesBackwards int) string {
 }
 
 func LogDefault(writer *os.File, time, level string, maxLength int, caller, message string) {
-	if SkiptTimestamp {
+	if SkipTimestamp {
 		fmt.Fprintf(writer, "%s %-*s | %s\n", level, maxLength, caller, message)
 	} else {
 		fmt.Fprintf(writer, "%s %s %-*s | %s\n", time, level, maxLength, caller, message)
