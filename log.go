@@ -6,6 +6,8 @@ import (
 	"path"
 	"runtime"
 	"time"
+
+	"github.com/gookit/color"
 )
 
 type Level int
@@ -14,6 +16,7 @@ const (
 	LOG_PLAIN Level = iota
 	LOG_DEBUG
 	LOG_INFO
+	LOG_WARN
 	LOG_ERROR
 	LOG_FATAL
 )
@@ -22,11 +25,13 @@ var (
 	LogLevel      Level  = LOG_INFO
 	DateFormat    string = "2006-01-02 15:04:05.000"
 	SkipTimestamp bool   = false
+	EnableColors  bool   = false
 
 	FormatFunctions map[Level]func(*os.File, string, string, int, string, string) = map[Level]func(*os.File, string, string, int, string, string){
 		LOG_PLAIN: LogPlain,
 		LOG_DEBUG: LogDefault,
 		LOG_INFO:  LogDefault,
+		LOG_WARN:  LogDefault,
 		LOG_ERROR: LogDefault,
 		LOG_FATAL: LogDefault,
 	}
@@ -38,6 +43,7 @@ var (
 		LOG_PLAIN: "",
 		LOG_DEBUG: "[DEBUG]",
 		LOG_INFO:  "[INFO] ",
+		LOG_WARN:  "[WARN]",
 		LOG_ERROR: "[ERROR]",
 		LOG_FATAL: "[FATAL]",
 	}
@@ -46,6 +52,7 @@ var (
 		LOG_PLAIN: os.Stdout,
 		LOG_DEBUG: os.Stdout,
 		LOG_INFO:  os.Stdout,
+		LOG_WARN:  os.Stderr,
 		LOG_ERROR: os.Stderr,
 		LOG_FATAL: os.Stderr,
 	}
@@ -96,9 +103,33 @@ func Debugb(framesBackward int, format string, a ...interface{}) {
 	log(LOG_DEBUG, 3+framesBackward, fmt.Sprintf(format, a...))
 }
 
+func Warn(format string, a ...interface{}) {
+	if LogLevel > LOG_WARN {
+		return
+	}
+	if EnableColors {
+		color.Set(color.FgYellow, color.OpBold)
+	}
+	log(LOG_WARN, 3, fmt.Sprintf(format, a...))
+}
+
+// Warnb is equal to Warn(...) but can go back in the stack and can therefore show function positions from previous functions.
+func Warnb(framesBackward int, format string, a ...interface{}) {
+	if LogLevel > LOG_WARN {
+		return
+	}
+	if EnableColors {
+		color.Set(color.FgYellow, color.OpBold)
+	}
+	log(LOG_WARN, 3+framesBackward, fmt.Sprintf(format, a...))
+}
+
 func Error(format string, a ...interface{}) {
 	if LogLevel > LOG_ERROR {
 		return
+	}
+	if EnableColors {
+		color.Set(color.FgRed, color.OpBold)
 	}
 	log(LOG_ERROR, 3, fmt.Sprintf(format, a...))
 }
@@ -107,6 +138,9 @@ func Error(format string, a ...interface{}) {
 func Errorb(framesBackward int, format string, a ...interface{}) {
 	if LogLevel > LOG_ERROR {
 		return
+	}
+	if EnableColors {
+		color.Set(color.FgRed, color.OpBold)
 	}
 	log(LOG_ERROR, 3+framesBackward, fmt.Sprintf(format, a...))
 }
@@ -136,6 +170,9 @@ func internalError(format string, a ...interface{}) {
 }
 
 func Fatal(format string, a ...interface{}) {
+	if EnableColors {
+		color.Set(color.FgRed, color.OpBold)
+	}
 	log(LOG_FATAL, 3, fmt.Sprintf(format, a...))
 	os.Exit(1)
 }
@@ -215,6 +252,7 @@ func LogDefault(writer *os.File, time, level string, maxLength int, caller, mess
 	} else {
 		fmt.Fprintf(writer, "%s %s %-*s | %s\n", time, level, maxLength, caller, message)
 	}
+	color.Reset()
 }
 
 func LogPlain(writer *os.File, time, level string, maxLength int, caller, message string) {
