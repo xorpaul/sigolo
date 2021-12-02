@@ -77,6 +77,9 @@ func Info(format string, a ...interface{}) {
 	if LogLevel > LOG_INFO {
 		return
 	}
+	if EnableColors {
+		color.Info.Prompt(s)
+	}
 	log(LOG_INFO, 3, fmt.Sprintf(format, a...))
 }
 
@@ -84,6 +87,9 @@ func Info(format string, a ...interface{}) {
 func Infob(framesBackward int, format string, a ...interface{}) {
 	if LogLevel > LOG_INFO {
 		return
+	}
+	if EnableColors {
+		color.Info.Prompt(s)
 	}
 	log(LOG_INFO, 3+framesBackward, fmt.Sprintf(format, a...))
 }
